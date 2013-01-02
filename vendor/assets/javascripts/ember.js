@@ -22890,7 +22890,7 @@ Ember.Location.registerImplementation('none', Ember.NoneLocation);
 @submodule ember-old-router
 */
 
-var get = Ember.get, set = Ember.set;bc
+var get = Ember.get, set = Ember.set;
 
 /**
   Ember.HashLocation implements the location API using the browser's
