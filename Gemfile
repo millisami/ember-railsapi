@@ -16,7 +16,7 @@ group :assets do
   gem 'compass-rails'
   gem 'uglifier'
   gem 'bootstrap-sass', '~> 2.0.3.0'
-  gem 'handlebars_assets', :github => 'bcardarella/handlebars_assets', :branch => :ember
+  gem 'handlebars_assets'
 end
 
 group :development do

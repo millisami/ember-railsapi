@@ -1,14 +1,4 @@
 GIT
-  remote: git://github.com/bcardarella/handlebars_assets.git
-  revision: 6d467f6f6dff2d377df65d397557f51c0932bef3
-  branch: ember
-  specs:
-    handlebars_assets (0.7.2)
-      execjs (>= 1.2.9)
-      sprockets (>= 2.0.3)
-      tilt
-
-GIT
   remote: git://github.com/rails-api/active_model_serializers.git
   revision: 7f87c9b3f2bb26372d75a5c10025e5dd881d6688
   specs:
@@ -76,6 +66,10 @@ GEM
     execjs (1.4.0)
       multi_json (~> 1.0)
     fssm (0.2.9)
+    handlebars_assets (0.8.0)
+      execjs (>= 1.2.9)
+      sprockets (>= 2.0.3)
+      tilt
     hike (1.2.1)
     i18n (0.6.1)
     journey (1.0.4)
@@ -152,7 +146,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2)
   compass-rails
   debugger
-  handlebars_assets!
+  handlebars_assets
   quiet_assets
   rails (= 3.2.9)
   rails-api
