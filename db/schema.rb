@@ -14,6 +14,7 @@
 ActiveRecord::Schema.define(:version => 20130101211258) do
 
   create_table "users", :force => true do |t|
+    t.text     "quote"
     t.string   "first_name"
     t.string   "last_name"
     t.integer  "age"

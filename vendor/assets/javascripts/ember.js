@@ -1,5 +1,5 @@
-// Version: v1.0.0-pre.2-263-g0e5be2e
-// Last commit: 0e5be2e (2013-01-02 07:41:05 -0800)
+// Version: v1.0.0-pre.2-288-geaa1123
+// Last commit: eaa1123 (2013-01-04 21:41:27 -0800)
 
 
 (function() {
@@ -142,8 +142,8 @@ if ('undefined' !== typeof window) {
 
 })();
 
-// Version: v1.0.0-pre.2-263-g0e5be2e
-// Last commit: 0e5be2e (2013-01-02 07:41:05 -0800)
+// Version: v1.0.0-pre.2-288-geaa1123
+// Last commit: eaa1123 (2013-01-04 21:41:27 -0800)
 
 
 (function() {
@@ -5706,6 +5706,12 @@ define("rsvp",
 
       var element = document.createElement('div');
       observer.observe(element, { attributes: true });
+
+      // Chrome Memory Leak: https://bugs.webkit.org/show_bug.cgi?id=93661
+      window.addEventListener('unload', function(){
+        observer.disconnect();
+        observer = null;
+      });
 
       async = function(callback, binding) {
         queue.push([callback, binding]);
@@ -15473,7 +15479,7 @@ Ember.merge(inBuffer, {
   // when a view is rendered in a buffer, rerendering it simply
   // replaces the existing buffer with a new one
   rerender: function(view) {
-    throw new Error("Something you did caused a view to re-render after it rendered but before it was inserted into the DOM.");
+    throw new Ember.Error("Something you did caused a view to re-render after it rendered but before it was inserted into the DOM.");
   },
 
   // when a view is rendered in a buffer, appending a child
@@ -16989,9 +16995,14 @@ Ember Views
 @submodule ember-handlebars
 */
 
-var objectCreate = Ember.create;
+// Eliminate dependency on any Ember to simplify precompilation workflow
+var objectCreate = Object.create || function(parent) {
+  function F() {}
+  F.prototype = parent;
+  return new F();
+};
 
-var Handlebars = Ember.imports.Handlebars;
+var Handlebars = this.Handlebars || Ember.imports.Handlebars;
 Ember.assert("Ember Handlebars requires Handlebars 1.0.beta.5 or greater", Handlebars && Handlebars.VERSION.match(/^1\.0\.beta\.[56789]$|^1\.0\.rc\.[123456789]+/));
 
 /**
@@ -17150,6 +17161,10 @@ if (Handlebars.compile) {
   };
 }
 
+
+})();
+
+(function() {
 /**
   @private
 
@@ -17612,7 +17627,7 @@ SimpleHandlebarsView.prototype = {
       case 'destroyed':
         break;
       case 'inBuffer':
-        throw new Error("Something you did tried to replace an {{expression}} before it was inserted into the DOM.");
+        throw new Ember.Error("Something you did tried to replace an {{expression}} before it was inserted into the DOM.");
       case 'hasElement':
       case 'inDOM':
         this.updateId = Ember.run.scheduleOnce('render', this, 'update');
@@ -19939,101 +19954,6 @@ Ember.TextArea = Ember.View.extend(Ember.TextSupport, {
 
 
 (function() {
-/**
-@module ember
-@submodule ember-handlebars
-*/
-
-/**
-@class TabContainerView
-@namespace Ember
-@deprecated
-@extends Ember.View
-*/
-Ember.TabContainerView = Ember.View.extend({
-  init: function() {
-    Ember.deprecate("Ember.TabContainerView is deprecated and will be removed from future releases.");
-    this._super();
-  }
-});
-
-})();
-
-
-
-(function() {
-/**
-@module ember
-@submodule ember-handlebars
-*/
-
-var get = Ember.get;
-
-/**
-  @class TabPaneView
-  @namespace Ember
-  @extends Ember.View
-  @deprecated
-*/
-Ember.TabPaneView = Ember.View.extend({
-  tabsContainer: Ember.computed(function() {
-    return this.nearestOfType(Ember.TabContainerView);
-  }).volatile(),
-
-  isVisible: Ember.computed(function() {
-    return get(this, 'viewName') === get(this, 'tabsContainer.currentView');
-  }).property('tabsContainer.currentView').volatile(),
-
-  init: function() {
-    Ember.deprecate("Ember.TabPaneView is deprecated and will be removed from future releases.");
-    this._super();
-  }
-});
-
-})();
-
-
-
-(function() {
-/**
-@module ember
-@submodule ember-handlebars
-*/
-
-var get = Ember.get, setPath = Ember.setPath;
-
-/**
-@class TabView
-@namespace Ember
-@extends Ember.View
-@deprecated
-*/
-Ember.TabView = Ember.View.extend({
-  tabsContainer: Ember.computed(function() {
-    return this.nearestInstanceOf(Ember.TabContainerView);
-  }).property().volatile(),
-
-  mouseUp: function() {
-    setPath(this, 'tabsContainer.currentView', get(this, 'value'));
-  },
-
-  init: function() {
-    Ember.deprecate("Ember.TabView is deprecated and will be removed from future releases.");
-    this._super();
-  }
-});
-
-})();
-
-
-
-(function() {
-
-})();
-
-
-
-(function() {
 /*jshint eqeqeq:false */
 
 /**
@@ -20848,9 +20768,9 @@ define("route-recognizer",
 
           charSpec = child.charSpec;
 
-          if (chars = charSpec.validChars) {
+          if (typeof (chars = charSpec.validChars) !== 'undefined') {
             if (chars.indexOf(char) !== -1) { returned.push(child); }
-          } else if (chars = charSpec.invalidChars) {
+          } else if (typeof (chars = charSpec.invalidChars) !== 'undefined') {
             if (chars.indexOf(char) === -1) { returned.push(child); }
           }
         }
@@ -21682,6 +21602,10 @@ Ember.controllerFor = function(container, controllerName, context) {
       controller = Ember.Controller.extend();
     }
 
+    controller.toString = function() {
+      return "(generated " + controllerName + " controller)";
+    };
+
     container.register('controller', controllerName, controller);
     controller = container.lookup('controller:' + controllerName);
   }
@@ -21704,10 +21628,13 @@ function setupLocation(router) {
       rootURL = get(router, 'rootURL');
 
   if ('string' === typeof location) {
-    set(router, 'location', Ember.Location.create({
-      implementation: location,
-      rootURL: rootURL
+    location = set(router, 'location', Ember.Location.create({
+      implementation: location
     }));
+
+    if (typeof rootURL === 'string') {
+      set(location, 'rootURL', rootURL);
+    }
   }
 }
 
@@ -22265,8 +22192,9 @@ Ember.onLoad('Ember.Handlebars', function(Handlebars) {
     tagName: 'a',
     namedRoute: null,
     currentWhen: null,
+    title: null,
     activeClass: 'active',
-    attributeBindings: 'href',
+    attributeBindings: ['href', 'title'],
     classNameBindings: 'active',
 
     active: Ember.computed(function() {
@@ -22444,7 +22372,7 @@ Ember.onLoad('Ember.Handlebars', function(Handlebars) {
     container = options.data.keywords.controller.container;
     router = container.lookup('router:main');
 
-    Ember.assert("This view is alredy rendered", !router || !router._lookupActiveView(name));
+    Ember.assert("This view is already rendered", !router || !router._lookupActiveView(name));
 
     view = container.lookup('view:' + name) || container.lookup('view:default');
 
@@ -23530,7 +23458,7 @@ var Application = Ember.Application = Ember.Namespace.extend(
 
   init: function() {
     if (!this.$) { this.$ = Ember.$; }
-    this.container = this.buildContainer();
+    this.__container__ = this.buildContainer();
     this.Router = this.Router || this.defaultRouter();
 
     this._super();
@@ -23551,7 +23479,7 @@ var Application = Ember.Application = Ember.Namespace.extend(
     @return {Ember.Container} the configured container
   */
   buildContainer: function() {
-    var container = this.container = Application.buildContainer(this);
+    var container = this.__container__ = Application.buildContainer(this);
 
     return container;
   },
@@ -23668,6 +23596,11 @@ var Application = Ember.Application = Ember.Namespace.extend(
     }
   },
 
+  register: function() {
+    var container = this.__container__;
+    return container.register.apply(container, arguments);
+  },
+
   /**
     @private
 
@@ -23685,7 +23618,7 @@ var Application = Ember.Application = Ember.Namespace.extend(
     this.isInitialized = true;
 
     // At this point, the App.Router must already be assigned
-    this.container.register('router', 'main', this.Router);
+    this.__container__.register('router', 'main', this.Router);
 
     // Run any injections and run the application load hook. These hooks may
     // choose to defer readiness. For example, an authentication hook might want
@@ -23706,9 +23639,9 @@ var Application = Ember.Application = Ember.Namespace.extend(
     @method runInitializers
   */
   runInitializers: function() {
-    var router = this.container.lookup('router:main'),
+    var router = this.__container__.lookup('router:main'),
         initializers = get(this.constructor, 'initializers'),
-        container = this.container,
+        container = this.__container__,
         graph = new Ember.DAG(),
         namespace = this,
         properties, i, initializer;
@@ -23783,7 +23716,7 @@ var Application = Ember.Application = Ember.Namespace.extend(
     @property router {Ember.Router}
   */
   startRouting: function() {
-    var router = this.container.lookup('router:main');
+    var router = this.__container__.lookup('router:main');
     if (!router) { return; }
 
     router.startRouting();
@@ -23803,7 +23736,7 @@ var Application = Ember.Application = Ember.Namespace.extend(
     var eventDispatcher = get(this, 'eventDispatcher');
     if (eventDispatcher) { eventDispatcher.destroy(); }
 
-    this.container.destroy();
+    this.__container__.destroy();
   },
 
   initializer: function(options) {
@@ -25183,8 +25116,8 @@ Ember States
 
 
 })();
-// Version: v1.0.0-pre.2-263-g0e5be2e
-// Last commit: 0e5be2e (2013-01-02 07:41:05 -0800)
+// Version: v1.0.0-pre.2-288-geaa1123
+// Last commit: eaa1123 (2013-01-04 21:41:27 -0800)
 
 
 (function() {
