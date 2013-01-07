@@ -18,6 +18,13 @@ App.UsersRoute = Ember.Route.extend
   setupController: (controller, model) ->
     @controllerFor('application').set('currentRoute', 'users')
 
+App.NewUserRoute = App.UsersRoute.extend
+  model: ->
+    App.User.createRecord({firstName:'', lastName:''})
+  setupController: (controller, model) ->
+    @_super()
+    controller.set('content', model)
+
 App.UserRoute = App.UsersRoute.extend
   model: (params) ->
     App.User.find(params.user_id)
