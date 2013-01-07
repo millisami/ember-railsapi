@@ -8,5 +8,5 @@ App.NewUserController = Ember.ObjectController.extend
     @transitionTo('showUser', @content)
 
   cancel: ->
-    @content.rollback()
+    @content.deleteRecord()
     @transitionTo('usersIndex')
