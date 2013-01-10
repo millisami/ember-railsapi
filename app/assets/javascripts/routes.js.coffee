@@ -5,10 +5,9 @@ App.Router.reopen
 App.Router.map (match) ->
   match('/').to 'home'
   match('/users').to 'users', (match) ->
-    match('/').to 'usersIndex'
-    match('/new').to 'newUser'
-    match('/:user_id/edit').to 'editUser'
-    match('/:user_id').to 'showUser'
+    match('/new').to 'new'
+    match('/:user_id/edit').to 'edit'
+    match('/:user_id').to 'show'
 
 App.HomeRoute = Ember.Route.extend
   setupController: (controller, model) ->
@@ -17,13 +16,6 @@ App.HomeRoute = Ember.Route.extend
 App.UsersRoute = Ember.Route.extend
   setupController: (controller, model) ->
     @controllerFor('application').set('currentRoute', 'users')
-
-App.NewUserRoute = App.UsersRoute.extend
-  model: ->
-    App.User.createRecord({firstName:'', lastName:''})
-  setupController: (controller, model) ->
-    @_super()
-    controller.set('content', model)
 
 App.UserRoute = App.UsersRoute.extend
   model: (params) ->
@@ -42,6 +34,13 @@ App.UsersIndexRoute = App.UsersRoute.extend
     @_super()
     controller.set('users', model)
 
-App.ShowUserRoute = App.UserRoute.extend()
+App.UsersNewRoute = App.UsersRoute.extend
+  model: ->
+    App.User.createRecord({firstName:'', lastName:''})
+  setupController: (controller, model) ->
+    @_super()
+    controller.set('content', model)
 
-App.EditUserRoute = App.UserRoute.extend()
+App.Users.ShowRoute = App.UserRoute.extend()
+
+App.Users.EditRoute = App.UserRoute.extend()
