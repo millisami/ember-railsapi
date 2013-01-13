@@ -40,7 +40,3 @@ App.UsersNewRoute = App.UsersRoute.extend
   setupController: (controller, model) ->
     @_super()
     controller.set('content', model)
-
-App.Users.ShowRoute = App.UserRoute.extend()
-
-App.Users.EditRoute = App.UserRoute.extend()

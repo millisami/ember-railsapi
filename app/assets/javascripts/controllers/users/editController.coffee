@@ -12,3 +12,6 @@ App.UsersEditController = Ember.ObjectController.extend
     if @content.isDirty
       @content.rollback()
     @transitionTo('users.show', @content)
+
+  buttonTitle: 'Edit'
+  headerTitle: 'Editing'
