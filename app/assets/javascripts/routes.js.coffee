@@ -2,14 +2,15 @@ App.Router.reopen
   location: 'history'
   rootURL: '/'
 
-App.Router.map (match) ->
-  match('/').to 'home'
-  match('/users').to 'users', (match) ->
-    match('/new').to 'new'
-    match('/:user_id/edit').to 'edit'
-    match('/:user_id').to 'show'
+App.Router.map ->
+  @resource 'users', ->
+    @route 'new'
+    @route 'edit',
+      path: '/:user_id/edit'
+    @route 'show'
+      path: '/:user_id'
 
-App.HomeRoute = Ember.Route.extend
+App.IndexRoute = Ember.Route.extend
   setupController: (controller, model) ->
     @controllerFor('application').set('currentRoute', 'home')
 
